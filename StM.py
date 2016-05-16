@@ -107,7 +107,7 @@ def hidemessage(filename, rate, f_format):
 	i = 0
 	tsize = imgSize - 1
 	message_index = 0
-	while i < len(message):
+	while message_index < len(message):
 		#random choise site
 		choise = random.randint(0, tsize)
 		h = tempPixel[choise]/coverHeight
@@ -121,9 +121,9 @@ def hidemessage(filename, rate, f_format):
 			temp_pixel = x_R
 
 		else:
-			if parity(x_R, k) == message[i]:
+			if parity(x_R, k) == message[message_index]:
 				temp_pixel = x_R
-			elif parity(x_S, k) == message[i]:
+			elif parity(x_S, k) == message[message_index]:
 				temp_pixel = x_S
 			else : 
 				print "Error!!!"
@@ -148,6 +148,8 @@ def hidemessage(filename, rate, f_format):
 				while parity(t, k) != parity(temp_pixel, k):
 					t += 1
 				coverPixels[h][w] = t
+			else : 
+				coverPixels[h][w] = temp_pixel
 					
 		temp = tempPixel[choise]
 		tempPixel[choise] = tempPixel[tsize]
@@ -155,7 +157,32 @@ def hidemessage(filename, rate, f_format):
 		tsize -= 1
 		i += 1
 
+	#extract from stm 
+	extractMessage = []
+	messageCount = 0
+	i = 0
+	tsize = imgSize - 1
+	while messageCount < len(message):
+		h = tempPixel[tsize]/coverHeight
+		w = tempPixel[tsize]%coverHeight
+		k = abs(random_1[i] - random_2[i])
+
+		if k != 0:
+			extractMessage.append(parity(coverPixels[h][w], k))
+			messageCount += 1
+
+		i += 1
+		tsize -= 1
+		
+	#check info
+	if message != extractMessage:
+		print "non hit!"
+		sys.exit(0)
+
+	#sample pair 
 	analysiz(coverPixels, coverWidth, coverHeight)
+
+	#save image
 	result = Image.fromarray(coverPixels)
 	result.save('stm/' + str(filename) + '_' + rate + f_format)
 	
@@ -179,28 +206,3 @@ elif len(sys.argv) == 4:
 else:
 	rule()
 	sys.exit(0)
-"""	
-	#extract message
-
-	extractMessage = []
-	messageSize = 0
-	messageCount = 0
-	s = 0 
-	h = 0 
-	w = 0 
-	getout = 0
-
-	for h in xrange(coverHeight):
-		for w in xrange(coverWidth):
-			if messageSize < len(message):
-				if messageCount < len(message) :
-					extractMessage.append(coverPixels[h][w] & 1)
-					messageCount += 1
-			else:
-				break
-	if message != extractMessage:
-		print "non hit!"
-		sys.exit(0)
-
-	#print extractMessage
-"""
