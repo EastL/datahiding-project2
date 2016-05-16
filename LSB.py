@@ -81,11 +81,12 @@ def hidemessage(filename, rate, f_format):
 
 	#print message
 
-
+	#for random choice
 	tempPixel = []
 	for i in range(imgSize):
 		tempPixel.append(i)
 
+	#LSB
 	tsize = imgSize - 1
 	messageCount = 0
 	while messageCount < len(message):
@@ -99,7 +100,26 @@ def hidemessage(filename, rate, f_format):
 		tsize -= 1
 		messageCount += 1
 
+	#extract from lsb
+	extractMessage = []
+	messageCount = 0
+	tsize = imgSize - 1
+	while messageCount < len(message):
+		h = tempPixel[tsize]/coverHeight
+		w = tempPixel[tsize]%coverHeight
+		extractMessage.append(coverPixels[h][w] & 1)
+		tsize -= 1
+		messageCount += 1
+		
+	#check info
+	if message != extractMessage:
+		print "non hit!"
+		sys.exit(0)
+	
+	#sample pair 
 	analysiz(coverPixels, coverWidth, coverHeight)
+
+	#save image
 	result = Image.fromarray(coverPixels)
 	result.save('t/' + str(filename) + '_' + rate + f_format)
 		
@@ -123,40 +143,3 @@ else:
 	rule()
 	sys.exit(0)
 	
-"""	
-	#hide message
-	messageCount = 0
-	for h in xrange(coverHeight):
-		for w in xrange(coverWidth):
-			if messageCount < len(message):
-				coverPixels[h][w] = coverPixels[h][w] & 0xfe | message[messageCount]
-				
-				messageCount += 1
-			else:
-				break
-	#extract message
-
-	extractMessage = []
-	messageSize = 0
-	messageCount = 0
-	s = 0 
-	h = 0 
-	w = 0 
-	getout = 0
-
-	for h in xrange(coverHeight):
-		for w in xrange(coverWidth):
-			if messageSize < len(message):
-				if messageCount < len(message) :
-					extractMessage.append(coverPixels[h][w] & 1)
-					messageCount += 1
-			else:
-				break
-	if message != extractMessage:
-		print "non hit!"
-		sys.exit(0)
-
-	#print extractMessage
-
-
-"""
